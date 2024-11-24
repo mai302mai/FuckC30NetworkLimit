@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>快速访问工具</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            font-family: Arial, sans-serif;
+            height: 100vh;
+        }
+
+        #sidebar {
+            width: 120px;
+            background-color: #f4f4f4;
+            border-right: 1px solid #ccc;
+            overflow-y: auto;
+        }
+
+        #sidebar ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #sidebar ul li {
+            padding: 5px;
+            margin: 5px;
+            background-color: #e0f7ff;
+            border: 1px solid #b3e5fc;
+            border-radius: 4px;
+            font-size: 12px;
+            text-align: center;
+            cursor: pointer;
+            word-break: break-word;
+        }
+
+        #sidebar ul li:hover {
+            background-color: #b3e5fc;
+        }
+
+        #quick-access {
+            padding: 10px 0;
+            border-bottom: 1px solid #ccc;
+        }
+
+        #quick-access li {
+            background-color: #ffd1a4;
+            border: 1px solid #ffa500;
+            font-weight: bold;
+        }
+
+        #content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #input-section {
+            padding: 15px;
+            background-color: #f8f8f8;
+            border-bottom: 1px solid #ccc;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #input-section input {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        #input-section button {
+            padding: 10px 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        #input-section button:hover {
+            background-color: #0056b3;
+        }
+
+        #iframe-container {
+            flex-grow: 1;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="sidebar">
+        <ul id="quick-access">
+            <li onclick="visitUrl('https://www.lockheedmartin.com')">洛克希德马丁</li>
+            <li onclick="visitUrl('https://www.so.com')">360搜索</li>
+            <li onclick="visitUrl('https://www.baidu.com')">百度搜索</li>
+            <li onclick="visitUrl('https://www.4399.com')">4399小游戏</li>
+            <li onclick="visitUrl('https://fanyi.youdao.com')">有道翻译</li>
+        </ul>
+        <ul id="history-list"></ul>
+    </div>
+    <div id="content">
+        <div id="input-section">
+            <input type="text" id="url-input" placeholder="输入网址 (需包含 http:// 或 https://)">
+            <button onclick="addToIframe()">访问</button>
+            <button onclick="handleJump()">跳转</button>
+        </div>
+        <div id="iframe-container">
+            <iframe id="iframe" src=""></iframe>
+        </div>
+    </div>
+
+    <script>
+        const iframe = document.getElementById('iframe');
+        const historyList = document.getElementById('history-list');
+        const visitedUrls = new Set(); // 存储访问历史，防止重复
+
+        // 跳转按钮功能
+        function handleJump() {
+            const url = document.getElementById('url-input').value.trim();
+            if (!url) return alert('请输入有效的网址！');
+            window.open(url, '_blank');
+        }
+
+        // 访问 URL
+        function visitUrl(url) {
+            const proxyUrl = `http://172.25.1.88:3000/proxy?url=${encodeURIComponent(url)}`;
+            iframe.src = proxyUrl;
+            if (url) {
+                // 如果是新网址，添加到访问历史
+                if (!visitedUrls.has(url)) {
+                    visitedUrls.add(url);
+                    const listItem = document.createElement('li');
+                    listItem.textContent = url;
+                    listItem.onclick = () => {
+                        iframe.src = url;
+                    };
+                    historyList.appendChild(listItem);
+                }
+
+                urlInput.value = ''; // 清空输入框
+            } else {
+                alert('请输入有效的网址');
+            }
+        }
+
+        /*
+        function visitUrl(url) {
+            iframe.src = url;
+
+            // 更新历史列表
+            if (!visitedUrls.has(url)) {
+                visitedUrls.add(url);
+                const listItem = document.createElement('li');
+                listItem.textContent = url;
+                listItem.onclick = () => {
+                    iframe.src = url;
+                };
+                historyList.appendChild(listItem);
+            }
+        }
+        */
+
+        // 通过输入框访问网址
+        function addToIframe() {
+            const urlInput = document.getElementById('url-input');
+            const url = urlInput.value.trim();
+            if (url) {
+                visitUrl(url);
+                urlInput.value = ''; // 清空输入框
+            } else {
+                alert('请输入有效的网址');
+            }
+        }
+    </script>
+</body>
+</html>
